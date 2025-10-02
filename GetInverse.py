@@ -104,7 +104,7 @@ def GetInverseByGaussJordan(M):
 def PrintMatrix(M):
     n = len(M[0])
     if n == 1 : 
-        # print("[ %7.3f ]" %M[0][0])   # 이렇게 하니까 부동소수점 오차로 인해 0이여야 할 것이 -0.000으로 출력됨
+        # print("[ %7.3f ]" %M[0][0])   # 이렇게 하니까 부동소수점 오차로 인해 0이여야 할 것이 가끔 -0.000으로 출력됨
         print("[ %7.3f ]" %CleanRound(M[0][0], 3))
         return
 
@@ -132,7 +132,7 @@ def CompareMatrix(M, N):
                 return False
     return True
 
-# 부동 소수점 오차로 인해 -0이 출력되는 문제를 해결
+# 부동 소수점 오차로 인해 가끔 -0이 출력되는 문제를 해결
 def CleanRound(num, r=3):
     eps=1e-9
     num = round(num, r)
@@ -140,6 +140,7 @@ def CleanRound(num, r=3):
         return 0.0
     return num
 
+# A * A^-1 = I 임을 활용해서 역함수가 참인지 확인한다.
 def CheckInverseIsCorrect(M, Orig):
     n = len(M)
     Mult = MatrixMultiply(M, Orig)
@@ -149,20 +150,20 @@ def CheckInverseIsCorrect(M, Orig):
     if CompareMatrix(Mult, I) : print("역행렬이 올바릅니다.")
     else : print("역행렬이 올바르지 않습니다.")
 
-
+# 행렬 곱셈
 def MatrixMultiply(M, N):
     n = len(M)
     # 결과 행렬 초기화
     R = [[float(0) for _ in range(n)] for _ in range(n)]
 
-    # 곱셈 수행
+    # 행렬 곱셈
     for i in range(n):
         for j in range(n):
-            for k in range(n):  # == rows_B
+            for k in range(n):
                 R[i][j] += M[i][k] * N[k][j]
     return R
 
-# 연립방정식 Ax = b 풀기
+# x = A^-1 * b를 이용해 연립방정식 Ax = b 풀기
 def GetSolutionOfLinearSystem(I, b):
     n = len(I)
     
@@ -277,7 +278,7 @@ def SolveLinearSystem():
             for j in range(n):
                 A[i][j] = inputNumbers[i * n + j]
 
-        # n 벡터 생성 및 0으로 채워넣기
+        # n차 벡터 생성 및 0으로 채워넣기
         b = [float(0) for _ in range(n)]
 
         inputNumbers = []
