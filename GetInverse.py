@@ -1,5 +1,6 @@
 # 행렬식을 이용해 역행렬 계산
 def GetInverseByDeterminant(M):
+    if (len(M) == 1) : return [ [1 / M[0][0]] ]     # 1x1은 직접 계산
     det = CalcDeterminant(M)    # 행렬식 계산
 
     # 행렬식이 0이면 역행렬 없음
@@ -102,10 +103,10 @@ def GetInverseByGaussJordan(M):
 
 # 행렬 출력
 def PrintMatrix(M):
-    n = len(M[0])
+    n = len(M)
     if n == 1 : 
         # print("[ %7.3f ]" %M[0][0])   # 이렇게 하니까 부동소수점 오차로 인해 0이여야 할 것이 가끔 -0.000으로 출력됨
-        print("[ %7.3f ]" %CleanRound(M[0][0], 3))
+        print("[ %7.3f   ]" %CleanRound(M[0][0], 3))
         return
 
     print("┌ ", end = "")
@@ -180,11 +181,11 @@ def GetInverseMatrix():
             try:
                 n = int(input("역행렬을 계산할 정방 행렬의 차수 (-1 To Exit) : "))
                 if (n < 1 and n != -1):
-                    print("1을 초과하는 양의 정수로 입력해주세요.")
+                    print("양의 정수로 입력해주세요.")
                     continue
                 break
             except:
-                print("1을 초과하는 양의 정수로 입력해주세요.")
+                print("양의 정수로 입력해주세요.")
         if (n == -1):
             break
 
@@ -218,6 +219,7 @@ def GetInverseMatrix():
         print("입력한 행렬 : ")
         PrintMatrix(M)
 
+        # 행렬식을 이용하여 역행렬 계산
         Determ = GetInverseByDeterminant(M)
         if (Determ != None) :
             print("행렬식으로 계산한 역행렬 : ")
@@ -243,11 +245,11 @@ def SolveLinearSystem():
             try:
                 n = int(input("Ax = b 일 때 A의 차수 (-1 To Exit) : "))
                 if (n < 1 and n != -1):
-                    print("1을 초과하는 양의 정수로 입력해주세요.")
+                    print("양의 정수로 입력해주세요.")
                     continue
                 break
             except:
-                print("1을 초과하는 양의 정수로 입력해주세요.")
+                print("양의 정수로 입력해주세요.")
         if (n == -1):
             break
 
@@ -344,6 +346,7 @@ def main():
         if mode == 1 : getInverseMatrix = True
         elif mode == 2 : solveLinearSystem = True
         elif mode == -1 : break
+        else : print("값을 제대로 입력해주세요!")
 
         if getInverseMatrix:
             GetInverseMatrix()
