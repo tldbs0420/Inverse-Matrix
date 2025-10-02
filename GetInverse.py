@@ -1,6 +1,59 @@
-
+# 행렬식을 이용해 역행렬 계산
 def GetInverseByDeterminant(M):
-    return 0
+    det = CalcDeterminant(M)    # 행렬식 계산
+
+    # 행렬식이 0이면 역행렬 없음
+    if det == 0:
+        print("행렬식이 0입니다. 역행렬이 없습니다.")
+        return None
+    
+    # 2x2는 직접 계산
+    if (len(M) == 2):
+        return [[M[1][1]/det, -1*M[0][1]/det],
+                [-1*M[1][0]/det, M[0][0]/det]]
+
+    cofactorMatrix = GetCofactorMatrix(M)   # 여인수행렬
+    I = GetTranspose(cofactorMatrix)        # 여인수행렬의 전치
+
+    # (1/det) * adjugate
+    n = len(I)
+    for i in range(n):
+        for j in range(n):
+            I[i][j] = I[i][j] / det     # 모든 성분에 행렬식 나눠주기
+    return I    # 최종 역행렬 반환
+
+def GetMinorOfMatrix(M, i, j):
+    return [row[:j] + row[j+1:] for row in (M[:i] + M[i+1:])]
+
+# 전치행렬 구하기
+def GetTranspose(M):
+    n, m = len(M), len(M)
+    T = [[0] * n for _ in range(m)] # 내보낼 전치 행렬
+    for i in range(n):
+        for j in range(m):
+            T[j][i] = M[i][j]
+    return T
+
+# 여인수행렬 구하기
+def GetCofactorMatrix(M):
+    n = len(M)
+    cofactorMatrix = []
+    for i in range(n):
+        cofactorRow = []
+        for j in range(n):
+            cofactorRow.append(((-1)**(i+j)) * CalcDeterminant(GetMinorOfMatrix(M, i, j)))
+        cofactorMatrix.append(cofactorRow)
+    return cofactorMatrix
+
+# 행렬식 계산
+def CalcDeterminant(M):
+    if len(M) == 2:  # 2x2는 직접 계산
+        return M[0][0]*M[1][1] - M[0][1]*M[1][0]
+    
+    det = 0
+    for c in range(len(M)):
+        det += ((-1)**c) * M[0][c] * CalcDeterminant(GetMinorOfMatrix(M, 0, c))     # 항상 0번 행을 기준으로 함
+    return det
 
 # 가우스-조던 소거법으로 역행렬 계산
 def GetInverseByGaussJordan(M):
@@ -22,7 +75,7 @@ def GetInverseByGaussJordan(M):
                     swap = k
                     break
             if (swap == -1):    # 바꿀 수 있는 행이 없음 : 역행렬이 없음
-                print("역행렬이 없습니다.")
+                print("Pivot이 0이며 대체행이 없습니다. 역행렬이 없습니다.")
                 return None
             M2[i], M2[swap] = M2[swap], M2[i]
             I[i], I[swap] = I[swap], I[i]
@@ -66,6 +119,14 @@ def PrintMatrix(M):
     for i in range(n):
         print("%7.3f " %CleanRound(M[n-1][i]),  end = "")
     print("  ┘")
+
+# 부동 소수점 오차로 인해 단순 비교하면 같은 값으로 보여도 다르다고 나옴
+def CompareMatrix(M, N):
+    for i in range(len(M)):
+        for j in range(len(N)):
+            if CleanRound(M[i][j], 3) != CleanRound(N[i][j], 3):
+                return False
+    return True
 
 # 부동 소수점 오차로 인해 -0이 출력되는 문제를 해결
 def CleanRound(num, r=3):
@@ -119,12 +180,21 @@ def main():
         print("입력한 행렬 : ")
         PrintMatrix(M)
 
+        Determ = GetInverseByDeterminant(M)
+        if (Determ != None) :
+            print("행렬식으로 계산한 역행렬 : ")
+            PrintMatrix(Determ)
+
         # 가우스-조던 소거법으로 역행렬 계산
         GJ = GetInverseByGaussJordan(M)
-        if (GJ == None): continue
+        if (GJ != None):
+            print("가우스-조던 소거법으로 계산한 역행렬 : ")
+            PrintMatrix(GJ)
 
-        print("가우스-조던 소거법으로 계산한 역행렬 : ")
-        PrintMatrix(GJ)
+        if (Determ == None or GJ == None) : continue
+
+        if (CompareMatrix(GJ, Determ)): print("두 방식의 결과가 같습니다.")
+        else: print("! 두 방식의 결과가 다릅니다 !")
 
 if __name__ == "__main__":
     main()
