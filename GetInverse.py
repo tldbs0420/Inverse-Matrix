@@ -140,17 +140,50 @@ def CleanRound(num, r=3):
         return 0.0
     return num
 
-def main():
+def CheckInverseIsCorrect(M, Orig):
+    n = len(M)
+    Mult = MatrixMultiply(M, Orig)
+    I = [[float(0) for _ in range(n)] for _ in range(n)]
+    for i in range(len(I)):
+        I[i][i] = 1
+    if CompareMatrix(Mult, I) : print("역행렬이 올바릅니다.")
+    else : print("역행렬이 올바르지 않습니다.")
+
+
+def MatrixMultiply(M, N):
+    n = len(M)
+    # 결과 행렬 초기화
+    R = [[float(0) for _ in range(n)] for _ in range(n)]
+
+    # 곱셈 수행
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):  # == rows_B
+                R[i][j] += M[i][k] * N[k][j]
+    return R
+
+# 연립방정식 Ax = b 풀기
+def GetSolutionOfLinearSystem(I, b):
+    n = len(I)
+    
+    x =  [0.0 for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            x[i] += I[i][j] * b[j]
+    return x
+
+# 역행렬 계산 모드
+def GetInverseMatrix():
     while True:
         while True: # 몇 차원 행렬로 할 것인지 입력
             try:
                 n = int(input("역행렬을 계산할 정방 행렬의 차수 (-1 To Exit) : "))
                 if (n < 1 and n != -1):
-                    print("숫자를 양수로 입력해주세요.")
+                    print("1을 초과하는 양의 정수로 입력해주세요.")
                     continue
                 break
             except:
-                print("숫자를 제대로 입력해주세요.")
+                print("1을 초과하는 양의 정수로 입력해주세요.")
         if (n == -1):
             break
 
@@ -188,17 +221,133 @@ def main():
         if (Determ != None) :
             print("행렬식으로 계산한 역행렬 : ")
             PrintMatrix(Determ)
+            CheckInverseIsCorrect(Determ, M)
 
         # 가우스-조던 소거법으로 역행렬 계산
         GJ = GetInverseByGaussJordan(M)
         if (GJ != None):
             print("가우스-조던 소거법으로 계산한 역행렬 : ")
             PrintMatrix(GJ)
+            CheckInverseIsCorrect(Determ, M)
 
         if (Determ == None or GJ == None) : continue
 
         if (CompareMatrix(GJ, Determ)): print("두 방식의 결과가 같습니다.")
         else: print("! 두 방식의 결과가 다릅니다 !")
+
+# 방정식 해 계산 모드
+def SolveLinearSystem():
+    while True:
+        while True: # 몇 차원 행렬로 할 것인지 입력
+            try:
+                n = int(input("Ax = b 일 때 A의 차수 (-1 To Exit) : "))
+                if (n < 1 and n != -1):
+                    print("1을 초과하는 양의 정수로 입력해주세요.")
+                    continue
+                break
+            except:
+                print("1을 초과하는 양의 정수로 입력해주세요.")
+        if (n == -1):
+            break
+
+        # n * n 행렬 생성 및 0으로 채워넣기
+        A = [[float(0) for _ in range(n)] for _ in range(n)]
+
+        inputNumbers = []
+        while len(inputNumbers) < n * n:
+            # 숫자 입력 (띄어쓰기 구분 가능)
+            inputLine = input("A 숫자 입력 : ").split()
+            numbersFromLine = []
+            # 입력받은 줄 내에서 해석 가능 범위까지 해석
+            try :
+                for num in inputLine:
+                    numbersFromLine.append(float(num))
+            except:
+                print("숫자를 제대로 입력해주세요.")
+
+            # 해석한 숫자들을 하나씩 추가
+            try:
+                for num in numbersFromLine:
+                    inputNumbers.append(num)
+            except:
+                print("숫자를 제대로 입력해주세요.")
+
+        # 숫자 할당
+        for i in range(n):
+            for j in range(n):
+                A[i][j] = inputNumbers[i * n + j]
+
+        # n 벡터 생성 및 0으로 채워넣기
+        b = [float(0) for _ in range(n)]
+
+        inputNumbers = []
+        while len(inputNumbers) < n:
+            # 숫자 입력 (띄어쓰기 구분 가능)
+            inputLine = input("b 숫자 입력 : ").split()
+            numbersFromLine = []
+            # 입력받은 줄 내에서 해석 가능 범위까지 해석
+            try :
+                for num in inputLine:
+                    numbersFromLine.append(float(num))
+            except:
+                print("숫자를 제대로 입력해주세요.")
+
+            # 해석한 숫자들을 하나씩 추가
+            try:
+                for num in numbersFromLine:
+                    inputNumbers.append(num)
+            except:
+                print("숫자를 제대로 입력해주세요.")
+
+        # 숫자 할당 ( 굳이 이 방식을 사용하는 이유는, 입력이 더 많을 때 칸 수를 맞추기 위해서 )
+        for i in range(n):
+            b[i] = inputNumbers[i]
+
+        I = GetInverseByDeterminant(A)          # 행렬식을 통한 역행렬 계산
+        if I != None:
+            x1 = GetSolutionOfLinearSystem(I, b)    # 방정식의 해 계산
+
+            print("행렬식을 이용한 방정식의 해 : \n[ " , end="")
+            for i in range(len(x1)):
+                print("%7.3f " %CleanRound(x1[i], 3), end="")
+            print("  ]")
+
+        I = GetInverseByGaussJordan(A)          # 가우스-조던 소거법을 통한 역행렬 계산
+        if I != None:
+            x2 = GetSolutionOfLinearSystem(I, b)    # 방정식의 해 계산
+
+            print("가우스-조던 소거법을 이용한 방정식의 해 : \n[ " , end="")
+            for i in range(len(x2)):
+                print("%7.3f " %CleanRound(x2[i], 3), end="")
+            print("  ]")
+
+            isSame = True
+            for i in range(len(x1)):
+                if CleanRound(x1[i], 3) != CleanRound(x2[i], 3):
+                    print("역행렬이 서로 달라 해가 다릅니다!")
+                    isSame = False
+                    break
+            if isSame: print("역행렬과 방정식의 해가 일치합니다!")
+
+
+def main():
+    while True:
+        print("사용할 기능을 입력하세요.")
+        print("1 : 역행렬 구하기")
+        print("2 : 연립방정식 해 구하기")
+        mode = int(input("모드 입력 (-1 To Exit) : "))
+
+        getInverseMatrix = False
+        solveLinearSystem = False
+
+        if mode == 1 : getInverseMatrix = True
+        elif mode == 2 : solveLinearSystem = True
+        elif mode == -1 : break
+
+        if getInverseMatrix:
+            GetInverseMatrix()
+        if solveLinearSystem:
+            SolveLinearSystem()
 
 if __name__ == "__main__":
     main()
