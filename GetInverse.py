@@ -47,8 +47,12 @@ def GetCofactorMatrix(M):
 
 # 행렬식 계산
 def CalcDeterminant(M):
-    if len(M) == 2:  # 2x2는 직접 계산
+    n = len(M)
+    if n == 2:  # 2x2는 직접 계산
         return M[0][0]*M[1][1] - M[0][1]*M[1][0]
+    
+    if n == 3:  # 3x3은 사루스 법칙 사용
+        return (M[0][0]*M[1][1]*M[2][2] + M[0][1]*M[1][2]*M[2][0] + M[0][2]*M[1][0]*M[2][1]) - (M[0][2]*M[1][1]*M[2][0] + M[0][0]*M[1][2]*M[2][1] + M[0][1]*M[1][0]*M[2][2])
     
     det = 0
     for c in range(len(M)):
