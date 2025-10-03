@@ -1,6 +1,10 @@
 # 행렬식을 이용해 역행렬 계산
 def GetInverseByDeterminant(M):
-    if (len(M) == 1) : return [ [1 / M[0][0]] ]     # 1x1은 직접 계산
+    if (len(M) == 1) :  # 1x1은 직접 계산
+        if M[0][0] != 0 : return [ [1 / M[0][0]] ]
+        else :
+            print("행렬식이 0입니다. 역행렬이 없습니다.") 
+            return None  # 0 예외처리
     det = CalcDeterminant(M)    # 행렬식 계산
 
     # 행렬식이 0이면 역행렬 없음
